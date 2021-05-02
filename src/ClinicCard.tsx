@@ -85,8 +85,8 @@ function sanitizeLink(link: string): string {
 }
 
 function addhttp(url: string): string {
-  if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
-      url = "http://" + url;
+  if (!url.match(/^[a-zA-Z]+:\/\//)) {
+    url = 'http://' + url;
   }
   return url;
 }
