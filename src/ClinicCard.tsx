@@ -45,36 +45,56 @@ export default function ClinicCard({ clinic }: { clinic: Clinic }) {
 }
 
 function DetailsRow({ field, value }: { field: keyof Clinic; value: string }) {
+  let elem: string;
+  
+  switch(field) {
+    case "key_2":
+      elem = generateGoogleMapsLink(value);
+      break;
+    case "key_8":
+      elem = `<a className="font-semibold text-sm" href="mailto:${value}"> ${value} </a>`;
+      break;
+    case "key_9":
+    case "key_12":
+        elem = sanitizeLink(removeWhiteSpace(value));;
+        break;
+    case "key_11":
+    case "key_10":
+    case "key_13":
+    case "key_14":
+      elem = sanitizeLink(value);
+      break;
+    case "key_7":
+      elem = `<a href="tel:${value}">${value}</a>`;
+      break;
+    default:
+      elem = `<span data-value={value} onClick={ ${copyToClipboard} } style={{ cursor: "copy" }}> ${value} </span>`;
+  }
+
   return (
-    <span className="text-base font-serif leading-relaxed">
-      {field === "key_9" || field === "key_12" ? (
-        <a
-          className="text-blue-400 underline"
-          target="_blank"
-          rel="noreferrer"
-          href={sanitizeLink(value)}
-        >
-          {sanitizeLink(value)}
-        </a>
-      ) : (
-        <span
-          data-value={value}
-          onClick={copyToClipboard}
-          style={{ cursor: "copy" }}
-          className={field === "key_8" ? "font-semibold text-sm" : ""}
-        >
-          {value}
-        </span>
-      )}
-    </span>
+    <span className="text-base font-serif leading-relaxed" dangerouslySetInnerHTML={{__html: elem}} />
   );
 }
 
 function sanitizeLink(link: string): string {
-  const url = link.includes("http") ? link : `http://${link}`;
-  return removeWhiteSpace(url);
+  const urlRegex = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9- ]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+  return link.replace(urlRegex, function(url) {
+    url = addhttp(removeWhiteSpace(url));
+    return '<a className="text-blue-400 underline" target="_blank" rel="noopener noreferrer" href="' + url + '">' + url + '</a>';
+  })
+}
+
+function addhttp(url: string): string {
+  if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
+      url = "http://" + url;
+  }
+  return url;
 }
 
 function removeWhiteSpace(value: string): string {
   return value.replace(/\s+/g, "");
+}
+
+function generateGoogleMapsLink(address: string): string {
+    return `<a className="text-blue-400 underline" target="_blank" rel="noopener noreferrer" href="http://maps.google.com/maps?q=${encodeURIComponent(address)}">${address}</a>`; 
 }
